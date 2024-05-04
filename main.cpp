@@ -10,14 +10,15 @@ using namespace std;
 
 int main () {
 	Company company;
-	Employee newEmployee("Van Huy Du",  "20/01/2002", MALE);
+    importDataFromFile(company);
 
-	company.addNewEmployee(newEmployee);
+    bool isRunning = true;
 
-	cout << company.getNumberOfEmployee() << endl;
-
-	addNewEmployee();
-	writeDataToFile(newEmployee, EMPLOYEE_DATE_PATH);
+    while (isRunning) {
+        App(company, isRunning);
+        system("cls");
+    }
+    
 	return 0;
 }
 

@@ -1,7 +1,8 @@
 #ifndef PARAMETER_H
 #define PARAMETER_H
 
-enum Gender { MALE, FEMALE };
+// enum Gender { MALE, FEMALE };
+// enum Role { EMPLOYEE, MANAGER, PRESIDENT };
 
 // Display
 #define ID_SPACE 5
@@ -15,6 +16,8 @@ enum Gender { MALE, FEMALE };
 
 // Regulation
 #define PHONE_LENGTH_SPACE 10
-#define EMPLOYEE_DATE_PATH "./data/employee.txt"
+#define EMPLOYEE_DATA_PATH "./data/employee-list.txt"
+#define DEPARTMENT_DATA_PATH "./data/department-list.txt"
+
 
 #endif

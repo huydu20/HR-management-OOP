@@ -3,6 +3,19 @@
         "iostream": "cpp",
         "ostream": "cpp",
         "vector": "cpp",
-        "string": "cpp"
-    }
+        "string": "cpp",
+        "system_error": "cpp",
+        "array": "cpp",
+        "functional": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp",
+        "iosfwd": "cpp",
+        "fstream": "cpp",
+        "iomanip": "cpp",
+        "typeinfo": "cpp",
+        "*.tcc": "cpp",
+        "sstream": "cpp"
+    },
+    "cmake.configureOnOpen": false
 }
