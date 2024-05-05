@@ -22,6 +22,14 @@ string trim(string str) {
     return result;
 }
 
+string toLower(string str) {
+    string temp = str;
+    for (int i = 0; i < str.length(); i++) {
+        temp[i] = tolower(str[i]);
+    }
+    return temp;
+}
+
 void pressAnyKey() {
     cout << endl;
     cout << "\nPress any key to back!";
@@ -85,7 +93,7 @@ bool checkPhoneInput(string phone) {
     return true;
 }
 
-bool confirm(string message = "") {
+bool confirm(string message = "Confirm?") {
     cout << message << endl;
     cout << "1. Yes" << endl;
     cout << "2. No" << endl;
@@ -152,7 +160,7 @@ string formatName(string name) {
     return result;
 }
 
-void printEmployee(Employee employee) {
+void printEmployee(Employee *employee) {
     cout << setw(ID_SPACE) << "Id";
     cout << setw(NAME_SPACE) << "Name";
     cout << setw(DATE_SPACE) << "Date";
@@ -161,26 +169,26 @@ void printEmployee(Employee employee) {
     cout << setw(POSITION_SPACE) << "Position";
     cout << setw(WORK_AT_SPACE) << "Work at";
     cout << endl;
-    cout << setw(ID_SPACE) << employee.getId();
-    cout << setw(NAME_SPACE) << employee.getName();
-    cout << setw(DATE_SPACE) << employee.getDate();
-    cout << setw(GENDER_SPACE) << employee.getGender();
-    cout << setw(PHONE_SPACE) << employee.getPhone();
-    cout << setw(POSITION_SPACE) << employee.getRole();
-    cout << setw(WORK_AT_SPACE) << employee.getDepId();
+    cout << setw(ID_SPACE) << employee->getId();
+    cout << setw(NAME_SPACE) << employee->getName();
+    cout << setw(DATE_SPACE) << employee->getDate();
+    cout << setw(GENDER_SPACE) << employee->getGender();
+    cout << setw(PHONE_SPACE) << employee->getPhone();
+    cout << setw(POSITION_SPACE) << employee->getRole();
+    cout << setw(WORK_AT_SPACE) << employee->getDepId();
     cout << endl;
 }
 
-void printDepartment(Department department) {
+void printDepartment(Department *department) {
     cout << setw(ID_SPACE) << "ID";
     cout << setw(NAME_SPACE) << "Name";
     cout << setw(NAME_SPACE) << "Manager ID";
     cout << setw(NAME_SPACE) << "Manager name";
     cout << endl;
-    cout << setw(ID_SPACE) << department.getId();
-    cout << setw(NAME_SPACE) << department.getName();
-    cout << setw(NAME_SPACE) << department.getManagerId();
-    cout << setw(NAME_SPACE) << department.getManagerName();
+    cout << setw(ID_SPACE) << department->getId();
+    cout << setw(NAME_SPACE) << department->getName();
+    cout << setw(NAME_SPACE) << department->getManagerId();
+    cout << setw(NAME_SPACE) << department->getManagerName();
     cout << endl;
 }
 
@@ -339,13 +347,27 @@ int deleteEmployee(Company& company) {
     cout << "Enter employee ID you want to delete: ";
     cin >> employeeId;
 
-    if (!confirm("Confirm ?")) {
-        cout << "Cancel !" << endl;
-        return 0;
-    } else {
-        company.deleteEmployee(employeeId);
-        cout << "Delete employee successful!" << endl;
+    bool isFound = false;
+
+    for (int i = 0; i <  company.getNumberOfEmployee(); i++) {
+        if (company.getEmployee(i)->getId() == employeeId) {
+            isFound = true;
+        }
     }
+
+    if (isFound) {
+        if (!confirm("Confirm ?")) {
+            cout << "Cancel !" << endl;
+            return 0;
+        } else {
+            company.deleteEmployee(employeeId);
+            cout << "Delete employee successful!" << endl;
+        }
+    } else {
+        cout << "Haven't employee with this ID !!" << endl;
+        return 0;
+    }
+
     return 1;
 }
 
@@ -371,15 +393,13 @@ int addNewDepartment(Company& company) {
     }
 
     company.updateEmployeeRole(managerId, "Manager");
-    Employee manager = company.getEmployeeByID(managerId);
+    Employee *manager = company.getEmployeeByID(managerId);
 
-    Department newDepartment = Department(company.getNumberOfDepartment() + 1, departmentName, manager.getId(), manager.getName());
+    Department newDepartment = Department(company.getNumberOfDepartment() + 1, departmentName, manager->getId(), manager->getName());
 
     company.addNewDepartment(newDepartment);
 
     cout << "Create new department successful!!" << endl;
-
-    printDepartment(newDepartment);
 
     return 1;
 }
@@ -390,12 +410,24 @@ int deleteDepartment(Company& company) {
     cout << "Enter department ID you want to delete: ";
     cin >> departmentId;
 
-    if (!confirm("Confirm ?")) {
-        cout << "Cancel !" << endl;
-        return 0;
+    bool isFound = false;
+
+    for (int i = 0; i <  company.getNumberOfDepartment(); i++) {
+        if (company.getDepartment(i)->getId() == departmentId) {
+            isFound = true;
+        }
+    }
+
+    if (isFound) {
+        if (!confirm("Confirm ?")) {
+            cout << "Cancel !" << endl;
+            return 0;
+        } else {
+            company.deleteDepartment(departmentId);
+            cout << "Delete department successful!" << endl;
+        }
     } else {
-        company.deleteDepartment(departmentId);
-        cout << "Delete employee successful!" << endl;
+        cout << "Haven't department with this ID !!" << endl;
     }
 
     return 1;
@@ -404,28 +436,99 @@ int deleteDepartment(Company& company) {
 // Search
 int searchEmployee(Company& company) {
 
-    int employeeId;
+    bool isChose = false;
+    bool isSelect = false;
+    int select;
+    while (!isChose) {
+        cout << "Do you want search by ?" << endl;
+        cout << "1. ID" << endl;
+        cout << "2. Name" << endl;
+        cout << "3. Back" << endl;
+        cout << "Input your select: ";
+        cin >> select;
+        switch (select) {
+            case 1: {
+                int employeeId;
+                cout << "Enter employee ID you want to search: ";
+                cin >> employeeId;
 
-    cout << "Enter employee ID you want to search: ";
-    cin >> employeeId;
+                while (employeeId <= 0) {
+                    cout << "Invalid employee ID !" << endl;
+                    cout << "Enter employee ID you want to search again: ";
+                    cin >> employeeId;
+                }
 
-    while (employeeId <= 0) {
-        cout << "Invalid employee ID !" << endl;
-        cout << "Enter employee ID you want to search again: ";
-        cin >> employeeId;
-    }
+                bool isFound = false;
 
-    bool isFound = false;
+                for (int i = 0; i <  company.getNumberOfEmployee(); i++) {
+                    if (company.getEmployee(i)->getId() == employeeId) {
+                        printEmployee(company.getEmployee(i));
+                        isFound = true;
+                    }
+                }
 
-    for (int i = 0; i <  company.getNumberOfEmployee(); i++) {
-        if (company.getEmployee(i).getId() == employeeId) {
-            printEmployee(company.getEmployee(i));
-            isFound = true;
+                if (!isFound) {
+                    cout << "Haven't employee with this ID !!" << endl;
+                    return 0;
+                }
+                isChose = true;
+                break;
+            } 
+            case 2: {
+                vector<Employee*> result;
+                string name;
+                cout << "Input employee name: ";
+                cin.ignore();
+                getline(cin, name);
+
+                name = toLower(name);
+
+                int count = 0;
+                for (int i = 0; i < company.getNumberOfEmployee(); i++) {
+                    string str = toLower(company.getEmployee(i)->getName());
+                    if (str.find(name) != string::npos) {
+                        result.push_back(company.getEmployee(i));
+                        count++;
+                    }
+                }
+                if (result.size() == 0) {
+                    cout << "Haven't employee with this name !!" << endl;
+                } else {
+                    cout << "Find " << count << " results" << endl;
+                    cout << setw(ID_SPACE) << "ID";
+                    cout << setw(NAME_SPACE) << "Name";
+                    cout << setw(DATE_SPACE) << "Date";
+                    cout << setw(GENDER_SPACE) << "Gender";
+                    cout << setw(PHONE_SPACE) << "Phone number";
+                    cout << setw(POSITION_SPACE) << "Position";
+                    cout << setw(WORK_AT_SPACE) << "Work at";
+                    cout << endl;
+                    for (int i = 0; i < result.size(); i++) {
+                        cout << setw(ID_SPACE) << result[i]->getId();
+                        cout << setw(NAME_SPACE) << result[i]->getName();
+                        cout << setw(DATE_SPACE) << result[i]->getDate();
+                        cout << setw(GENDER_SPACE) << result[i]->getGender();
+                        cout << setw(PHONE_SPACE) << result[i]->getPhone();
+                        cout << setw(POSITION_SPACE) << result[i]->getRole();
+                        cout << setw(WORK_AT_SPACE) << company.getDepartmentById(result[i]->getDepId())->getName();
+                        cout << endl;
+                    }
+                }
+
+                isChose = true;
+                break;
+            }
+                
+            case 3:
+                isChose = true;
+                break;
+            case 4:
+                isChose = true;
+                break;
+            default:
+                cout << "Invalid selection!" << endl;
+                break;
         }
-    }
-
-    if (!isFound) {
-        cout << "Haven't employee with this ID !!" << endl;
     }
 
     return 1;
@@ -447,7 +550,7 @@ int searchDepartment(Company& company) {
     bool isFound = false;
 
     for (int i = 0; i <  company.getNumberOfDepartment(); i++) {
-        if (company.getDepartment(i).getId() == departmentId) {
+        if (company.getDepartment(i)->getId() == departmentId) {
             printDepartment(company.getDepartment(i));
             isFound = true;
         }
@@ -460,6 +563,358 @@ int searchDepartment(Company& company) {
     return 1;
 }
 
+// Update
+int updateEmployee(Company &company) {
+
+    int employeeId;
+    cout << "Enter employee ID you want to update: ";
+    cin >> employeeId;
+
+    bool isFound = false;
+
+    for (int i = 0; i <  company.getNumberOfEmployee(); i++) {
+        if (company.getEmployee(i)->getId() == employeeId) {
+            isFound = true;
+        }
+    }
+
+    if (!isFound) {
+        cout << "Haven't employee with this ID !!" << endl;
+        return 0;
+    }
+
+    bool isSelect = false;
+
+    while(!isSelect) {
+        int select;
+
+        cout << "What do you want to edit?" << endl;
+        cout << "1. Name" << endl;
+        cout << "2. Date" << endl;
+        cout << "3. Gender" << endl;
+        cout << "4. Phone" << endl;
+        cout << "5. Role" << endl;
+        cout << "6. Department" << endl;
+
+        cin >> select;
+
+        switch (select) {
+            case 1: {
+                string newName; 
+                cout << "Input new employee name: ";
+                cin.ignore();
+                getline(cin, newName);
+
+                if (!confirm())
+                    break;
+                
+                company.getEmployeeByID(employeeId)->setName(formatName(newName));
+
+                cout << "Update successful!!" << endl;
+
+                isSelect = true;
+                break;
+            }
+
+            case 2: {
+                string newDate; 
+                cout << "Input new employee date: ";
+                cin.ignore();
+                getline(cin, newDate);
+
+                if(!isValidDate(newDate)) {
+                    cout << "Invalid date input!!" << endl;
+                    break;
+                }
+
+                if (!confirm())
+                    break;
+                
+                company.getEmployeeByID(employeeId)->setDate(newDate);
+
+                cout << "Update successful!!" << endl;
+                
+                isSelect = true;
+                break;
+            }
+
+            case 3: {
+                int newGender; 
+                cout << "Select new employee gender: " << endl;
+                cout << "1. Male" << endl;
+                cout << "2. Female" << endl;
+                cout << "3. Back" << endl;
+                cin >> newGender;
+
+                switch (newGender) {
+                    case 1: {
+                        if (!confirm())
+                            break;
+
+                        company.getEmployeeByID(employeeId)->setGender("Male");
+                        break;
+                    }
+
+                    case 2: {
+                        if (!confirm())
+                            break;
+
+                        company.getEmployeeByID(employeeId)->setGender("Female");
+                        break;
+                    }
+                    case 3: {
+                        break;
+                    }
+                        
+                    default:
+                        cout << "Invalid input!!" << endl;
+                        break;
+                }
+                
+                cout << "Update successful!!" << endl;
+                
+                isSelect = true;
+                break;
+            }
+
+            case 4: {
+                string newPhone; 
+                cout << "Input new employee phone: ";
+                cin.ignore();
+                getline(cin, newPhone);
+
+                if(!checkPhoneInput(newPhone)) {
+                    cout << "Invalid phone input!!" << endl;
+                    break;
+                }
+
+                if (!confirm())
+                    break;
+                
+                company.getEmployeeByID(employeeId)->setPhone(newPhone);
+
+                cout << "Update successful!!" << endl;
+                
+                isSelect = true;
+                break;
+            }
+
+            case 5: {
+                int newRole; 
+                cout << "Select new employee role: " << endl;
+                cout << "1. Employee" << endl;
+                cout << "2. Manager" << endl;
+                cout << "3. Customer" << endl;
+                cout << "4. President" << endl;
+                cout << "5. Back" << endl;
+                cin >> newRole;
+
+                switch (newRole) {
+                    case 1: {
+                        if (!confirm())
+                            break;
+
+                        company.getEmployeeByID(employeeId)->setRole("Employee");
+                        break;
+                    }
+                    case 2: {
+                        if (!confirm())
+                            break;
+
+                        company.getEmployeeByID(employeeId)->setRole("Manager");
+                        break;
+                    }
+                    case 3: {
+                        if (!confirm())
+                            break;
+
+                        company.getEmployeeByID(employeeId)->setRole("Customer");
+                        break;
+                    }
+                    case 4: {
+                        if (!confirm())
+                            break;
+
+                        company.getEmployeeByID(employeeId)->setRole("President");
+                        break;
+                    }
+                    case 5: {
+                        break;
+                    }
+                    default:
+                        cout << "Invalid input!!" << endl;
+                        break;
+                }
+                
+                cout << "Update successful!!" << endl;
+                
+                isSelect = true;
+                break;
+            }
+
+            case 6: {
+                int newDep; 
+                cout << "Select new employee department: " << endl;
+                cout << "1. Personnel" << endl;
+                cout << "2. Finance" << endl;
+                cout << "3. Back" << endl;
+                cin >> newDep;
+
+                switch (newDep) {
+                    case 1: {
+                        if (!confirm())
+                            break;
+
+                        company.getEmployeeByID(employeeId)->setDepId(1);
+                        break;
+                    }
+                    case 2: {
+                        if (!confirm())
+                            break;
+
+                        company.getEmployeeByID(employeeId)->setDepId(2);
+                        break;
+                    }
+                    case 3: {
+                        break;
+                    }
+                    default:
+                        cout << "Invalid input!!" << endl;
+                        break;
+                }
+                
+                cout << "Update successful!!" << endl;
+                
+                isSelect = true;
+                break;
+            }
+
+            default: {
+                cout << "Invalid selection!" << endl;
+                break;
+            }
+        }
+    }
+
+    return 1;
+}
+
+int updateDepartment(Company &company) {
+    int departmentId;
+    cout << "Enter department ID you want to update: ";
+    cin >> departmentId;
+
+    bool isFound = false;
+
+    for (int i = 0; i < company.getNumberOfDepartment(); i++) {
+        if (company.getDepartment(i)->getId() == departmentId) {
+            isFound = true;
+        }
+    }
+
+    if (!isFound) {
+        cout << "Haven't department with this ID !!" << endl;
+        return 0;
+    }
+
+    bool isSelect = false;
+
+    while(!isSelect) {
+        int select;
+
+        cout << "What do you want to edit?" << endl;
+        cout << "1. Manager" << endl;
+        cout << "2. Back" << endl;
+
+        cin >> select;
+
+        switch (select) {
+            case 1: {
+                int newManager; 
+                cout << "Input manager ID: ";
+                cin >> newManager;
+
+                if (!confirm())
+                    break;
+                
+                bool isHasEmployee = false;
+
+                for (int i = 0; i <  company.getNumberOfEmployee(); i++) {
+                    if (company.getEmployee(i)->getId() == newManager) {
+                        isHasEmployee = true;
+                    }
+                }
+
+                if (!isHasEmployee) {
+                    cout << "Cannot find employee with this ID!!" << endl;
+                    break;
+                } else {
+                    company.getDepartmentById(departmentId)->setManagerId(newManager);
+                    company.getDepartmentById(departmentId)->setManagerName(company.getEmployeeByID(newManager)->getName());
+
+                    cout << "Update successful!!" << endl;
+                }
+
+                isSelect = true;
+                break;
+            }
+
+            case 2: {
+                isSelect = true;
+                break;
+            }
+
+            default: {
+                cout << "Invalid selection!" << endl;
+                break;
+            }
+        }
+    }
+    return 1;
+}
+
+int update(Company &company) {
+
+    bool isSelect = false;
+
+    while (!isSelect) {
+        cout << "Update information" << endl;
+        cout << "1. Department" << endl;
+        cout << "2. Employee" << endl;
+        cout << "3. Back" << endl;
+
+        int select;
+        
+        cout << "Input your select: ";
+        cin >> select;
+
+        switch (select) {
+            case 1: {
+                updateDepartment(company);
+                isSelect = true;
+                break;
+            }
+
+            case 2: {
+                updateEmployee(company);
+                isSelect = true;
+                break;
+            }
+
+            case 3: {
+                isSelect = true;
+                break;
+            }
+
+            default: {
+                cout << "Invalid selection!" << endl;
+                break;
+            }
+        }
+    }
+
+
+}
 // Arrange
 int arrange(Company& company) {
 
@@ -496,15 +951,15 @@ void writeDataToFile(Company &company) {
     fileEmployeesData << endl;
 
     for (int i = 0; i < company.getNumberOfEmployee(); i++ ){
-        Employee employee = company.getEmployee(i);
+        Employee *employee = company.getEmployee(i);
 
-        fileEmployeesData << setw(ID_SPACE) << employee.getId();
-        fileEmployeesData << setw(NAME_SPACE) << employee.getName();
-        fileEmployeesData << setw(DATE_SPACE) << employee.getDate();
-        fileEmployeesData << setw(GENDER_SPACE) << employee.getGender();
-        fileEmployeesData << setw(PHONE_SPACE) << employee.getPhone();
-        fileEmployeesData << setw(POSITION_SPACE) << employee.getRole();
-        fileEmployeesData << setw(WORK_AT_SPACE) << employee.getDepId();
+        fileEmployeesData << setw(ID_SPACE) << employee->getId();
+        fileEmployeesData << setw(NAME_SPACE) << employee->getName();
+        fileEmployeesData << setw(DATE_SPACE) << employee->getDate();
+        fileEmployeesData << setw(GENDER_SPACE) << employee->getGender();
+        fileEmployeesData << setw(PHONE_SPACE) << employee->getPhone();
+        fileEmployeesData << setw(POSITION_SPACE) << employee->getRole();
+        fileEmployeesData << setw(WORK_AT_SPACE) << employee->getDepId();
         fileEmployeesData << endl;
     }
 
@@ -530,12 +985,12 @@ void writeDataToFile(Company &company) {
     fileDepartmentsData << endl;
 
     for (int i = 0; i < company.getNumberOfDepartment(); i++ ){
-        Department department = company.getDepartment(i);
+        Department *department = company.getDepartment(i);
 
-        fileDepartmentsData << setw(ID_SPACE) << department.getId();
-        fileDepartmentsData << setw(NAME_SPACE) << department.getName();
-        fileDepartmentsData << setw(NAME_SPACE) << department.getManagerId();
-        fileDepartmentsData << setw(NAME_SPACE) << department.getManagerName();
+        fileDepartmentsData << setw(ID_SPACE) << department->getId();
+        fileDepartmentsData << setw(NAME_SPACE) << department->getName();
+        fileDepartmentsData << setw(NAME_SPACE) << department->getManagerId();
+        fileDepartmentsData << setw(NAME_SPACE) << department->getManagerName();
         fileDepartmentsData << endl;
     }
 
@@ -648,9 +1103,10 @@ void App(Company& company, bool& isRunning) {
     cout << "*   4. Add new department               *" << endl; // done
     cout << "*   5. Delete department                *" << endl; // done
     cout << "*   6. Search department                *" << endl; // done
-    cout << "*   7. Arrange                          *" << endl; // 
-    cout << "*   8. Display                          *" << endl; // 
-    cout << "*   9. Export data to file              *" << endl; // 
+    cout << "*   7. Update                           *" << endl; // done
+    cout << "*   8. Arrange                          *" << endl; // done
+    cout << "*   9  Display                          *" << endl; // done
+    cout << "*   10. Export data to file             *" << endl; // done
     cout << "*   0. Exit                             *" << endl; // 
     cout << "=========================================" << endl;
     cout << "Input your select: ";
@@ -683,16 +1139,20 @@ void App(Company& company, bool& isRunning) {
         pressAnyKey();
         break;
     case 7:
-        arrange(company);
+        update(company);
         pressAnyKey();
         break;
     case 8:
+        arrange(company);
+        pressAnyKey();
+        break;
+    case 9:
         company.displayAllEmployee();
         cout << endl;
         company.displayAllDepartment();
         pressAnyKey();
         break;
-    case 9:
+    case 10:
         writeDataToFile(company);
         pressAnyKey();
         break;

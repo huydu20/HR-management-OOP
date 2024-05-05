@@ -31,9 +31,22 @@ class Person {
 		string getGender() {
 			return gender;
 		}
+
+		void setName(string value) {
+			this->name = value;
+		}
+
+		void setDate(string value) {
+			this->date = value;
+		}
+
+		void setGender(string value) {
+			this->gender = value;
+		}
 };
 
 class Department {
+
 	int id;
 	string name;
 	int manager_id = 0;
@@ -58,13 +71,22 @@ class Department {
 		string getManagerName() {
 			return manager_name;
 		}
+
+		void setName(string value) {
+			this->name = value;
+		}
+
+		void setManagerId(int value) {
+			this->manager_id = value;
+		}
+
+		void setManagerName(string value) {
+			this->manager_name = value;
+		}
 };
 
 class Employee : public Person {
 
-	string name;
-	string date;
-	string gender;
 	string phone;
 	string role;
 	int id; 
@@ -101,8 +123,16 @@ class Employee : public Person {
 			return depId;
 		}
 
-		void setRole(string newRole) {
-			this->role = newRole;
+		void setPhone(string value) {
+			this->phone = value;
+		}
+
+		void setRole(string value) {
+			this->role = value;
+		}
+
+		void setDepId(int value) {
+			this->depId = value;		
 		}
 };
 
@@ -117,14 +147,14 @@ class Company {
 			departments.push_back(value);
 		}
 
-		Department getDepartment(int pos) {
-			return departments[pos];
+		Department* getDepartment(int pos) {
+			return &departments[pos];
 		}
 
-		Department getDepartmentById(int id) {
+		Department* getDepartmentById(int id) {
 			for (int i = 0; i < departments.size(); i++) {
 				if(departments[i].getId() == id) {
-					return departments[i];
+					return &departments[i];
 					break;
 				}
 			}
@@ -162,14 +192,14 @@ class Company {
 			return employees.size();
 		}
 
-		Employee getEmployee(int pos) {
-			return employees[pos];
+		Employee *getEmployee(int pos) {
+			return &employees[pos];
 		}
 
-		Employee getEmployeeByID(int id) {
+		Employee* getEmployeeByID(int id) {
 			for (int i = 0; i < employees.size(); i++) {
 				if(employees[i].getId() == id) {
-					return employees[i];
+					return &employees[i];
 				}
 			}
 		}
@@ -237,7 +267,7 @@ class Company {
 				cout << setw(GENDER_SPACE) << employees[i].getGender();
 				cout << setw(PHONE_SPACE) << employees[i].getPhone();
 				cout << setw(POSITION_SPACE) << employees[i].getRole();
-				cout << setw(WORK_AT_SPACE) << getDepartmentById(employees[i].getDepId()).getName();
+				cout << setw(WORK_AT_SPACE) << getDepartmentById(employees[i].getDepId())->getName();
 				cout << endl;
 			}
 		}
